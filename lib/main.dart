@@ -1,20 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:aula/cliente.dart';
+import 'package:aula/daoFirestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MyApp());
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  DaoFirestore.inicializa();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  // This widget is the root of your application.
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,17 +36,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final clientes = <String, String>{"nome": "André", "idade": "20"};
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
-      db.collection("clientes").doc("cliente$_counter").set(clientes).onError(
-            (error, stackTrace) => print("deu ruim"),
-          );
+      DaoFirestore.salvar(Cliente(idade: 10, nome: "andre"), _counter);
     });
   }
 
@@ -70,6 +63,32 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            Expanded(
+              child: StreamBuilder<List<Cliente>>(
+                stream: DaoFirestore.getClientes(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return const Text('Erro ao carregar dados');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('Nenhum cliente encontrado');
+                  } else {
+                    final clientes = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: clientes.length,
+                      itemBuilder: (context, index) {
+                        final cliente = clientes[index];
+                        return ListTile(
+                          title: Text(cliente.nome),
+                          subtitle: Text('Idade: ${cliente.idade}'),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -77,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
