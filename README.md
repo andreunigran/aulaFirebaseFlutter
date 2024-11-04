@@ -10,6 +10,9 @@ linux sudo apt install nodejs npm //instalação via
 *
 **instalação do firebase**
 * npm install -g firebase-tools
+* **Caso ocorra erro atualize o node**
+* sudo npm install -g n
+
 * firebase login
 **lista todos os projetos do firebase
 **
