@@ -3,8 +3,7 @@ import 'package:aula/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class DaoRealTime
- {
+class DaoRealTime {
   static final FirebaseDatabase db = FirebaseDatabase.instance;
 
   static void inicializa() async {
@@ -14,9 +13,9 @@ class DaoRealTime
   }
 
   static void salvar(Cliente c, int _counter) {
-    db.ref("clientes/cliente$_counter").set(c.toMap()).onError(
-      (error, stackTrace) => print("Erro ao salvar cliente: $error"),
-    );
+    db.ref("clientes").child("cliente$_counter").set(c.toMap).onError(
+          (error, stackTrace) => print("Erro ao salvar cliente: $error"),
+        );
   }
 
   // Função para buscar clientes do Realtime Database
