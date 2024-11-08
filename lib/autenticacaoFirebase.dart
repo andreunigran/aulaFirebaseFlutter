@@ -1,25 +1,25 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Autenticacaofarebase {
-  Future<void> signInWithEmailPassword(String email, String password) async {
+class AutenticacaoFirebase {
+  Future<String> signInWithEmailPassword(String email, String password) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      print("Usuário autenticado: ${userCredential.user!.uid}");
+      return "Usuário autenticado: ${userCredential.user!.uid}";
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print("Usuário não encontrado");
+        return "Usuário não encontrado";
       } else if (e.code == 'wrong-password') {
-        print("Senha incorreta");
+        return "Senha incorreta";
       }
+      return "Erro de autenticação";
     }
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<String> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
@@ -30,11 +30,13 @@ class Autenticacaofarebase {
         idToken: googleAuth?.idToken,
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
-      print("Usuário autenticado com Google");
+      return "Usuário autenticado com Google";
+    } else {
+      return "Erro ao autenticar com Google";
     }
   }
 
-  Future<void> signIn(String email, String password) async {
+  Future<String> signIn(String email, String password) async {
     final response = await http.post(
       Uri.parse('https://sua-api.com/login'),
       headers: {"Content-Type": "application/json"},
@@ -45,26 +47,44 @@ class Autenticacaofarebase {
       var data = json.decode(response.body);
       String token = data['token'];
       // Salve o token em um armazenamento seguro
-      print("Autenticação bem-sucedida, token: $token");
+      return "Autenticação bem-sucedida, token: $token";
     } else {
-      print("Erro de autenticação");
+      return "Erro de autenticação";
     }
   }
 
-  //registro
-  Future<void> registerWithEmailPassword(String email, String password) async {
+  Future<String> registerWithEmailPassword(
+      String email, String password) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      print("Usuário registrado com sucesso: ${userCredential.user!.uid}");
+      return "Usuário registrado com sucesso: ${userCredential.user!.uid}";
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print("A senha é muito fraca.");
+        return "A senha é muito fraca.";
       } else if (e.code == 'email-already-in-use') {
-        print("A conta já existe para esse email.");
+        return "A conta já existe para esse email.";
       }
+      return "Erro de registro";
     } catch (e) {
-      print("Erro: $e");
+      return "Erro: $e";
     }
+  }
+
+  Future<String> signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn()
+          .signOut(); // Se o usuário tiver feito login com Google, faça logout
+      return "Usuário desconectado com sucesso";
+    } catch (e) {
+      return "Erro ao desconectar: $e";
+    }
+  }
+
+  Future<bool> isUserLoggedIn() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user !=
+        null; // Retorna true se o usuário estiver logado, caso contrário, false
   }
 }
