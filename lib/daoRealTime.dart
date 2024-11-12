@@ -18,6 +18,12 @@ class DaoRealTime {
         );
   }
 
+  static void salvarAutoID(Cliente c) {
+    db.ref("clientes").push().set(c.toMap).catchError(
+          (error) => print("Erro ao salvar cliente: $error"),
+        );
+  }
+
   // Função para buscar clientes do Realtime Database
   static Stream<List<Cliente>> getClientes() {
     return db.ref("clientes").onValue.map((event) {

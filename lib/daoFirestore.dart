@@ -19,6 +19,12 @@ class DaoFirestore {
         );
   }
 
+  static void salvarAutoID(Cliente c) {
+    db.collection("clientes").add(c.toMap).catchError(
+          (error) => print("deu ruim: $error"),
+        );
+  }
+
   // Função para buscar clientes do Firestore
   static Stream<List<Cliente>> getClientes() {
     return FirebaseFirestore.instance.collection('clientes').snapshots().map(

@@ -1,5 +1,6 @@
 import 'package:aula/cliente.dart';
 import 'package:aula/daoFirestore.dart';
+import 'package:aula/login.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -32,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
     setState(() {
       _counter++;
-      DaoFirestore.salvar(Cliente(idade: 10, nome: "andre"), _counter);
+      DaoFirestore.salvar(Cliente(idade: 20, nome: "andre"), _counter);
     });
   }
 
@@ -42,6 +43,25 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            const DrawerHeader(
+                decoration: BoxDecoration(color: Colors.blue),
+                child: Column(children: [
+                  CircleAvatar(
+                      backgroundImage: AssetImage("lib/images/avatar.png")),
+                  Text("André Martins")
+                ])),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text("Login"),
+              onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Login())),
+            )
+          ],
+        ),
       ),
       body: Center(
         child: Column(
